@@ -29,7 +29,8 @@ def generate_random_password(total_len):
         # Check if there is not a number on the first 3 positions
         for character in password[:3]:
             if character.isnumeric():
-                first_three_rule = False        
+                first_three_rule = False
+                break      
 
         else:
             # Check if the special chars are not on a specific position 
@@ -42,6 +43,6 @@ def generate_random_password(total_len):
         return password
 
 
-password = generate_random_password(24) # Make the password with the lenght that is given
+password = generate_random_password(24) # Make the password with the length that is given
 
 print(password)
