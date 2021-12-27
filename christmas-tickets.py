@@ -23,12 +23,13 @@ def get_names():
                 print("U moet meer dan 2 spelers hebben toegevoegd om te stoppen") # Error message
         else:
             # If the name is not already chosen
-            if name not in names:
-                names.append(name) # Add the name to the list
-        
+            if name not in names and len(name) > 0:
+                # Add the name to the dictionary
+                names.append(name)
+
             # If the name is already chosen
             else:
-                print(f"De naam {name} is al gekozen", end="\n") # Error message
+                print(f"De naam {name} is al gekozen, of de lengte van de naam is kleiner 0", end="\n") # Error message
 
     # If the user did not want to add more names
     else:
@@ -37,36 +38,36 @@ def get_names():
 
 # Give a person another person to make a christmas present
 def get_tickets(names):
-    tickets = {}
+    ticket_information = {} # Make a dictionary to store the tickets
 
-    # For every name the user added
+    # For every name that is chosen
     for name in names:
-        random_name_choosing = True
+        random_name_choosing = True # When the random name is the same as the name that need a ticket
 
-        # While the random name is the same as the persons name
         while random_name_choosing:
-            random_name = choice(names)
+            random_name = choice(names) # Choose a random name
 
-            if random_name != name:
-                tickets[name] = random_name
-                random_name_choosing = False
+            # If the name is not the same, and the name is not already used
+            if random_name != name and random_name not in ticket_information.values():
+                ticket_information[name] = random_name # Add the random name to the personst icket
 
+                random_name_choosing = False # Go to the next person
 
-    return tickets # Return the dictionary with all the persons and the person he got
+    return ticket_information # Return the dictionary with all the persons and the person they got
 
 
 # Show which person got who
-def show_tickets(tickets):
-    # For every person
-    for person in tickets:
-        print(f"persoon genaamd '{person}' heeft het lot van de persoon genaamd '{tickets[person]}' getrokken ")
+def show_tickets(ticket_information):
+    # Show every person their respective ticket
+    for person in ticket_information:
+        print(f"persoon genaamd '{person}' heeft het lot van de persoon genaamd '{ticket_information[person]}' getrokken ")
 
 
 # Call all the functions
 def main():
-    names = get_names() # Ask all the names
-    tickets = get_tickets(names) # Give the persons another persons ticket
-    show_tickets(tickets) # Show the persons the persons got
+    ticket_information = get_names() # Ask all the names
+    ticket_information = get_tickets(ticket_information) # Give the persons another persons ticket
+    show_tickets(ticket_information) # Show which person got who
 
 
 
