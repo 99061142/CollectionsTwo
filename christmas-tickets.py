@@ -39,16 +39,18 @@ def get_names():
 # Give a person another person to make a christmas present
 def get_tickets(names):
     ticket_information = {} # Make a dictionary to store the tickets
+    possible_names = names.copy()
 
     # For every name that is chosen
     for name in names:
         random_name_choosing = True # When the random name is the same as the name that need a ticket
 
         while random_name_choosing:
-            random_name = choice(names) # Choose a random name
+            random_name = choice(possible_names) # Choose a random name
 
             # If the name is not the same, and the name is not already used
-            if random_name != name and random_name not in ticket_information.values():
+            if random_name != name and random_name in possible_names:
+                possible_names.remove(random_name)
                 ticket_information[name] = random_name # Add the random name to the personst icket
 
                 random_name_choosing = False # Go to the next person
