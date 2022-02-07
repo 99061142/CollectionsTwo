@@ -1,8 +1,17 @@
+from random import choice
+
 board = {
     "red": [-2, 0, 2, ' ', ' ', ' ', 7, 10, ' ', ' '],
     "blue": [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', -2],
     "white": [' ', ' ', ' ', ' ', ' ']
 }
+
+dices = {
+    "red": (1, 2, 3, 4, 5, 6),
+    "blue": (1, 2, 3, 4, 5, 6),
+    "white": (1, 1, 1, 2, 2, 3)
+}
+
 
 
 # Get the previous value in the row
@@ -71,8 +80,6 @@ def get_possible_positions(chosen_number:int, board_color:str) -> list:
 
 # Show the board
 def show_board():
-    print("board:", end="\n\n")
-
     # For every row color
     for color in board:
         row_values = [str(value) for value in board[color]] # All values as string
@@ -86,11 +93,47 @@ def show_board():
             print("\n")
 
 
-def main():
-    number = 5 # Test number
+def throw_dices() -> dict:
+    throwed_dices = {}
 
-    show_board()
-    possible_positions = get_possible_positions(number, "red") # Get the possible positions inside the row
+    for color in dices:
+        throwed_dices[color] = choice(dices[color])
+
+    return throwed_dices
+
+
+def get_number_options(throwed_dices:dict) -> list:
+    number_options = [] # List where the options gets stored
+
+    # Value of the color dice
+    red_dice = throwed_dices['red']
+    blue_dice = throwed_dices['blue']
+    white_dice = throwed_dices['white']
+
+
+    highest_number = max(throwed_dices.values())
+    lowest_number = min(throwed_dices.values())
+
+    # Add the options to the list
+    number_options.extend([
+        blue_dice + red_dice + white_dice,
+        blue_dice + red_dice - white_dice,
+        blue_dice + red_dice,
+        highest_number - lowest_number
+    ])
+
+    return number_options
+
+
+
+
+def main():
+    throwed_dices = throw_dices()
+    number_options = get_number_options(throwed_dices)
+    
+
+#    show_board()
+#    possible_positions = get_possible_positions(chosen_number, "red") # Get the possible positions inside the row
 
 
 
