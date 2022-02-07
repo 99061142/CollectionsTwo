@@ -1,5 +1,8 @@
-red_numbers = [-2, 0, 2, '', '', '', 7, 10, '', ''] # Red row
-blue_numbers = ['', '', '', '', '', '', '', '', '', -2] # Blue row
+board = {
+    "red": [-2, 0, 2, ' ', ' ', ' ', 7, 10, ' ', ' '],
+    "blue": [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', -2],
+    "white": [' ', ' ', ' ', ' ', ' ']
+}
 
 
 # Get the previous value in the row
@@ -27,7 +30,7 @@ def get_next_value(index:int, chosen_number:int, array:list, board_color:str):
 def get_possible_positions(chosen_number:int, board_color:str) -> list:
     possible_positions = [False] * 10 # List with the possible positions
     
-    array = red_numbers # Test array
+    array = board[board_color] # Test array
 
 
     # Check every value inside the array
@@ -66,11 +69,28 @@ def get_possible_positions(chosen_number:int, board_color:str) -> list:
     return possible_positions
 
 
+# Show the board
+def show_board():
+    print("board:", end="\n\n")
+
+    # For every row color
+    for color in board:
+        row_values = [str(value) for value in board[color]] # All values as string
+
+        print(f"{color}: ", end="")
+
+        # For every value
+        for value in row_values:
+            print(f"| {value} |", end="   ")
+        else:   
+            print("\n")
+
+
 def main():
     number = 5 # Test number
 
+    show_board()
     possible_positions = get_possible_positions(number, "red") # Get the possible positions inside the row
-    print(possible_positions)
 
 
 
