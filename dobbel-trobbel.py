@@ -125,12 +125,26 @@ def get_number_options(throwed_dices:dict) -> list:
     return number_options
 
 
+def choose_number(number_options:list) -> int:
+    number_options = [str(value) for value in number_options] # All values as string
+
+    choosing_number = True # If the user must choose a number which is an option
+
+    # While the user did not choose a number which is an option
+    while choosing_number:
+        chosen_number = input(f"Which number do you want to choose? Choose between {', '.join(number_options)}: ")
+
+        # If the user did choose a number which is an option
+        if chosen_number in number_options:
+            choosing_number = False
+
+    return int(chosen_number)
 
 
 def main():
     throwed_dices = throw_dices()
     number_options = get_number_options(throwed_dices)
-    
+    chosen_number = choose_number(number_options)
 
 #    show_board()
 #    possible_positions = get_possible_positions(chosen_number, "red") # Get the possible positions inside the row
