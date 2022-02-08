@@ -13,7 +13,6 @@ dices = {
 }
 
 
-
 # Get the previous value in the row
 def get_previous_value(index:int, chosen_number:int, array:list, board_color:str):
     # If the index position is not the start
@@ -36,6 +35,7 @@ def get_next_value(index:int, chosen_number:int, array:list, board_color:str):
     return next_value
 
 
+# Check which position is free in the board
 def get_possible_positions(chosen_number:int, board_color:str) -> list:
     possible_positions = [False] * 10 # List with the possible positions
     
@@ -90,19 +90,44 @@ def show_board():
         for value in row_values:
             print(f"| {value} |", end="   ")
         else:   
-            print("\n")
+            print("\n", end="\n")
 
 
+# Throw the dices
 def throw_dices() -> dict:
     throwed_dices = {}
 
+    # Throw every dice
     for color in dices:
-        throwed_dices[color] = choice(dices[color])
+        throwed_dices[color] = choice(dices[color]) # Add the random chosen number
 
     return throwed_dices
 
 
-def get_number_options(throwed_dices:dict) -> list:
+# Get the number that is the lowest and highest
+def highest_lowest_numbers(throwed_dices:dict) -> dict:
+    highest_lowest = {"highest": {}, "lowest": {}, "equal": False}
+
+    dice_values = throwed_dices.copy() # Copy the throwed dices information
+    del dice_values['white'] # Delete the white dice information
+
+    dice_values_list = list(dice_values.copy()) # All the dice values
+
+    # If every value is the same
+    if dice_values_list.count(dice_values_list[0]) == len(dice_values_list):
+        highest_lowest['equal'] = True
+
+    else:
+        highest_lowest['highest']['color'] = max(dice_values, key=dice_values.get) # Highest dice color
+        highest_lowest['lowest']['color'] = min(dice_values, key=dice_values.get) # Lowest dice color
+        highest_lowest['highest']['number'] = max(dice_values.values()) # Highest dice value
+        highest_lowest['lowest']['number'] = min(dice_values.values()) # Lowest dice value
+
+    return highest_lowest
+
+
+# Calculate the possible numbers
+def get_number_options(throwed_dices:dict, highest_lowest:dict) -> list:
     number_options = [] # List where the options gets stored
 
     # Value of the color dice
@@ -110,21 +135,18 @@ def get_number_options(throwed_dices:dict) -> list:
     blue_dice = throwed_dices['blue']
     white_dice = throwed_dices['white']
 
-
-    highest_number = max(throwed_dices.values())
-    lowest_number = min(throwed_dices.values())
-
     # Add the options to the list
     number_options.extend([
         blue_dice + red_dice + white_dice,
         blue_dice + red_dice - white_dice,
         blue_dice + red_dice,
-        highest_number - lowest_number
+        highest_lowest['highest']['number'] - highest_lowest['lowest']['number']
     ])
 
     return number_options
 
 
+# Let the user choose a number
 def choose_number(number_options:list) -> int:
     number_options = [str(value) for value in number_options] # All values as string
 
@@ -141,10 +163,29 @@ def choose_number(number_options:list) -> int:
     return int(chosen_number)
 
 
+# Get the row color on which the user can add the chosen number
+def get_adding_color(highest_lowest:dict) -> list:
+    acceptable_rows = []
+
+    # If the lowest and highest value are the same
+    if highest_lowest['equal']:
+        # Add both colors
+        for color in highest_lowest:
+            acceptable_rows.append(color)
+    else:
+        # Add the lowest color
+        lowest_throwed_color = highest_lowest['lowest']['color']
+        acceptable_rows.append(lowest_throwed_color)
+    
+    return acceptable_rows
+
+
 def main():
     throwed_dices = throw_dices()
-    number_options = get_number_options(throwed_dices)
+    highest_lowest = highest_lowest_numbers(throwed_dices)
+    number_options = get_number_options(throwed_dices, highest_lowest)
     chosen_number = choose_number(number_options)
+    acceptable_rows = get_adding_color(highest_lowest)
 
 #    show_board()
 #    possible_positions = get_possible_positions(chosen_number, "red") # Get the possible positions inside the row
