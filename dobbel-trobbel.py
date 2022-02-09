@@ -298,6 +298,60 @@ def get_white_dice(throwed_dices:dict) -> int:
     return throwed_dices['white'] # White dice the user rolled
 
 
+# Calculate the first sub total number
+def calculate_sub_total_one() -> int:
+    total_number = 0
+
+    # Check the red and blue board 
+    for red_value, blue_value in zip(board['red'], board['blue']):
+        # If the red position is empty
+        if isinstance(red_value, str):
+            red_value = 0
+        
+        # If the blue position is empty
+        if isinstance(blue_value, str):
+            blue_value = 0
+
+        # Add the red miltiplied by blue number to the list
+        total_number += red_value * blue_value
+
+    return total_number
+
+
+# Calculate the second sub total number
+def calculate_sub_total_two() -> int:
+    empty_position = 0 # Total empty positions
+
+    total_white_value = 0 # Every white value added on eachother
+
+    # Check every value in the board
+    for row_color in board:
+        for value in board[row_color]:
+            # If the position is empty
+            if isinstance(value, str):
+                empty_position += 1
+            
+            # If the white row is being checked
+            if row_color == "white":
+                # If the position is empty
+                if isinstance(value, str):
+                    value = 0
+            
+                total_white_value += value # Add the number to the total number
+
+    return total_white_value * empty_position # Return the total white amount multiplied by the empty positions
+
+
+# Calculate the endscore
+def calculate_end_score(sub_total_one:int, sub_total_two:int) -> int:
+    return sub_total_one - sub_total_two
+
+
+# Show the endscore
+def show_end_score(end_score:int):
+    print(f"The endscore is {end_score}")
+
+
 def main():
     game_over = False
 
@@ -328,6 +382,12 @@ def main():
             if check_add_white_row(chosen_character):
                 show_possible_positions(possible_white_positions) # Show the white row, with the possible position(s) in it
                 choose_position(white_dice, possible_white_positions) # Let the user choose a possible position to place the number
+        else:
+            sub_total_one = calculate_sub_total_one()
+            sub_total_two = calculate_sub_total_two()
+            end_score = calculate_end_score(sub_total_one, sub_total_two)
+
+            show_end_score(end_score)
 
 
 
