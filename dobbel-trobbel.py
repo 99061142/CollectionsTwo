@@ -169,6 +169,7 @@ def choose_number(number_options:dict) -> str:
 
     return chosen_character
 
+
 # Get the row color on which the user can add the chosen number
 def get_adding_color(highest_lowest:dict) -> list:
     acceptable_rows = []
@@ -243,32 +244,90 @@ def get_number_from_character(number_options:dict, chosen_character:str) -> int:
     return number_options[chosen_character]
 
 
+# Check if the user must add the white dice value
 def check_add_white_row(chosen_character:str) -> bool:
+    # If the user chose the character "c" or "d"
     add_white_dice = True if chosen_character == "c" or chosen_character == "d" else False
 
     return add_white_dice
 
 
+#  Get which possible number can be chosen by the user
+def get_valid_possibilities(number_options:dict, acceptable_rows:list) -> dict:
+    number_options_list = list(number_options.values()) # All the possible numbers
+    
+    # For every number
+    for key, number_option in zip(number_options, number_options_list):
+        # Check if the number can be added to the specific row
+        possible_positions = get_possible_positions(number_option, acceptable_rows)
+        
+        # Check if the row has an empty position
+        for values_list in possible_positions.values():
+            for value in values_list:
+                # If the position is empty
+                if value:
+                    break
+            else:  
+                # If the row is full, the possible number gets deleted 
+                del number_options[key]
+
+    return number_options
+
+
+# Check if the game is over
+def check_gameover(number_options:dict, possible_positions:dict) -> bool:
+    white_row_full = False # If there is no possible position in the white row
+    possible_white_positions = possible_positions['white'] # Possible white row positions list
+
+    # Check if there is a possible position in the white row
+    for value in possible_white_positions:
+        # If there is a possible position
+        if value:
+            break
+    else:
+        white_row_full = True # If the white row has not any possible position
+
+    # If the user can't add the chosen number to the row(s)
+    game_over = False if number_options and not white_row_full else True
+
+    return game_over
+
+
+# Get the white dice
+def get_white_dice(throwed_dices:dict) -> int:
+    return throwed_dices['white'] # White dice the user rolled
+
+
 def main():
-    show_board() # Show the current board
-    throwed_dices = throw_dices() # Throw the random dices
-    highest_lowest = highest_lowest_numbers(throwed_dices) # Get the highest and lowest dice information
-    number_options = get_number_options(throwed_dices, highest_lowest) # Get the possible numbers the user can choose
-    chosen_character = choose_number(number_options) # Let the user choose a possible character for the number
-    chosen_number = get_number_from_character(number_options, chosen_character)
-    acceptable_rows = get_adding_color(highest_lowest) # Get the color(s) of the rows the user can add the number
-    possible_positions = get_possible_positions(chosen_number, acceptable_rows) # Get the possible positions inside the row
+    game_over = False
 
-    show_possible_positions(possible_positions) # Show the possible row(s), with the possible position(s) in it
-    choose_position(chosen_number, possible_positions)# Let the user choose a possible position to place the number
+    while not game_over:
+        show_board() # Show the current board
 
-    # If the must must add the white dice to the white row
-    if check_add_white_row(chosen_character):
-        white_dice = throwed_dices['white'] # White dice the user rolled
+        throwed_dices = throw_dices() # Throw the random dices
+        white_dice = get_white_dice(throwed_dices) # Get the white dice
 
+        highest_lowest = highest_lowest_numbers(throwed_dices) # Get the highest and lowest dice information
+        acceptable_rows = get_adding_color(highest_lowest) # Get the color(s) of the rows the user can add the number
+
+        number_options = get_number_options(throwed_dices, highest_lowest) # Get the possible numbers the user can choose
+        number_options = get_valid_possibilities(number_options, acceptable_rows)
+        
         possible_white_positions = get_possible_positions(white_dice, ['white']) # Get the possible positions in the white row
-        show_possible_positions(possible_white_positions) # Show the white row, with the possible position(s) in it
-        choose_position(white_dice, possible_white_positions) # Let the user choose a possible position to place the number
+        game_over = check_gameover(number_options, possible_white_positions)
+
+        if not game_over:
+            chosen_character = choose_number(number_options) # Let the user choose a possible character for the number
+            chosen_number = get_number_from_character(number_options, chosen_character)
+            possible_positions = get_possible_positions(chosen_number, acceptable_rows) # Get the possible positions inside the row
+
+            show_possible_positions(possible_positions) # Show the possible row(s), with the possible position(s) in it
+            choose_position(chosen_number, possible_positions)# Let the user choose a possible position to place the number
+
+            # If the must must add the white dice to the white row
+            if check_add_white_row(chosen_character):
+                show_possible_positions(possible_white_positions) # Show the white row, with the possible position(s) in it
+                choose_position(white_dice, possible_white_positions) # Let the user choose a possible position to place the number
 
 
 
