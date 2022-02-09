@@ -131,8 +131,8 @@ def highest_lowest_numbers(throwed_dices:dict) -> dict:
 
 
 # Calculate the possible numbers
-def get_number_options(throwed_dices:dict, highest_lowest:dict) -> list:
-    number_options = [] # List where the options gets stored
+def get_number_options(throwed_dices:dict, highest_lowest:dict) -> dict:
+    number_options = {} # Numbers the user can choose
 
     # Value of the color dice
     red_dice = throwed_dices['red']
@@ -140,32 +140,30 @@ def get_number_options(throwed_dices:dict, highest_lowest:dict) -> list:
     white_dice = throwed_dices['white']
 
     # Add the options to the list
-    number_options.extend([
-        blue_dice + red_dice + white_dice,
-        blue_dice + red_dice - white_dice,
-        blue_dice + red_dice,
-        highest_lowest['highest']['number'] - highest_lowest['lowest']['number']
-    ])
+    number_options['a'] = blue_dice + red_dice + white_dice
+    number_options['b'] = blue_dice + red_dice - white_dice
+    number_options['c'] = blue_dice + red_dice
+    number_options['d'] = highest_lowest['highest']['number'] - highest_lowest['lowest']['number']
 
     return number_options
 
 
 # Let the user choose a number
-def choose_number(number_options:list) -> int:
-    number_options = [str(value) for value in number_options] # All values as string
-
-    choosing_number = True # If the user must choose a number which is an option
+def choose_number(number_options:dict) -> str:
+    choosing_character = True # If the user must choose a number which is an option
 
     # While the user did not choose a number which is an option
-    while choosing_number:
-        chosen_number = input(f"Which number do you want to choose? Choose between {', '.join(number_options)}: ")
+    while choosing_character:
+        for number_character, number_option in zip(number_options, number_options.values()):
+            print(f"{number_character}: {number_option}", end="\n")
+
+        chosen_character = input("Which number do you want to choose? Choose between the characters: ").lower()
 
         # If the user did choose a number which is an option
-        if chosen_number in number_options:
-            choosing_number = False
+        if chosen_character in number_options:
+            choosing_character = False
 
-    return int(chosen_number)
-
+    return chosen_character
 
 # Get the row color on which the user can add the chosen number
 def get_adding_color(highest_lowest:dict) -> list:
@@ -182,19 +180,77 @@ def get_adding_color(highest_lowest:dict) -> list:
     return acceptable_rows
 
 
+def show_possible_positions(chosen_number:int, possible_positions:dict):
+    # For every row the user can choose from
+    for color in possible_positions:
+        row_values = [str(value) for value in board[color]] # All values as string
+
+        print(f"{color}:", end=" ")
+
+        # Show the values in the row, and the possible positions the user can choose from
+        for value, possible_position in zip(row_values, possible_positions[color]):
+            # If the position is not possible
+            if not possible_position:
+                print(f"| {value} |", end="   ")
+            
+            # If the position is possible
+            else:
+                print(f"| x |", end="   ")
+
+        else:   
+            print("\n", end="\n")
+
+
+def choose_position(chosen_number:int, possible_positions:dict): 
+    choosing_position = True # If the user must choose a possible position
+
+    # If the user did not choose a possible position
+    while choosing_position:
+        chosen_position = input("Choose a possible position (x) (Examples: red 1, blue 4, etc...): ")
+
+        # Check if the user answered the question correectly
+        try:
+            chosen_position_information = chosen_position.split()
+            
+            chosen_color = chosen_position_information[0]
+            chosen_position = int(chosen_position_information[1]) - 1
+
+            board[chosen_color][chosen_position]
+        
+        # If the user did not answered the question correctly
+        except (KeyError, IndexError, ValueError):
+            pass
+        
+        # If the user answered the question correctly
+        else:
+            # Check if the chosen color is the row color the user can choose from
+            if chosen_color in possible_positions.keys():
+                # If the user chose a number that is not out of the row
+                if chosen_position >= 0 and chosen_position < len(board[chosen_color]):   
+                    # If the position is empty     
+                    if possible_positions[chosen_color][chosen_position]:
+                        board[chosen_color][chosen_position] = chosen_number # Add the chosen number to the row
+
+                        choosing_position = False 
+
+
+# Get the number from the character the user chose
+def get_number_from_character(number_options:dict, chosen_character:str) -> int:
+    return number_options[chosen_character]
+
+
 def main():
-#    show_board()
-
-
-    throwed_dices = throw_dices()
-    highest_lowest = highest_lowest_numbers(throwed_dices)
-    number_options = get_number_options(throwed_dices, highest_lowest)
-    chosen_number = choose_number(number_options)
-    acceptable_rows = get_adding_color(highest_lowest)
+    show_board()
+    throwed_dices = throw_dices() # Throw the random dices
+    highest_lowest = highest_lowest_numbers(throwed_dices) # Get the highest and lowest dice information
+    number_options = get_number_options(throwed_dices, highest_lowest) # Get the possible numbers the user can choose
+    chosen_character = choose_number(number_options) # Let the user choose a possible character for the number
+    chosen_number = get_number_from_character(number_options, chosen_character)
+    acceptable_rows = get_adding_color(highest_lowest) # Get the color(s) of the rows the user can add the number
     possible_positions = get_possible_positions(chosen_number, acceptable_rows) # Get the possible positions inside the row
+    show_possible_positions(chosen_number, possible_positions) # Show the possible positions to the user
+    choose_position(chosen_number, possible_positions) # Let the user choose a possible position to place the enumber
 
-
-    print(possible_positions)
 
 
 
