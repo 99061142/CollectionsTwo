@@ -38,43 +38,47 @@ def get_next_value(index:int, chosen_number:int, array:list, board_color:str):
 # Check which position is free in the board
 def get_possible_positions(chosen_number:int, acceptable_rows:list) -> dict:
     possible_positions = {} # List with the possible positions
-    
+
     # For every possible row
     for row_color in acceptable_rows:
-        possible_positions[row_color] = [False] * 10
+        possible_positions[row_color] = [False] * len(board[row_color])
 
         array = board[row_color] # Numbers in the row
 
         for index, value in enumerate(array):
-            previous_value = get_previous_value(index, chosen_number, array, row_color)
-            next_value = get_next_value(index, chosen_number, array, row_color)
+            if row_color == "white":
+                if isinstance(value, str):
+                    possible_positions[row_color][index] = True
+            else:
+                previous_value = get_previous_value(index, chosen_number, array, row_color)
+                next_value = get_next_value(index, chosen_number, array, row_color)
 
 
-            # If the value is empty
-            if isinstance(value, str):
-                # If the previous value is empty
-                if isinstance(previous_value, str): 
-                    possible_positions[row_color][index] = True # Possible position
+                # If the value is empty
+                if isinstance(value, str):
+                    # If the previous value is empty
+                    if isinstance(previous_value, str): 
+                        possible_positions[row_color][index] = True # Possible position
 
-                    # If the next value is not empty
-                    if isinstance(next_value, int): 
+                        # If the next value is not empty
+                        if isinstance(next_value, int): 
+                            """
+                            if the next value is not correct
+                            (higher than the chosen number for the red row
+                            lower than the chosen number for the blue row)
+                            """
+                            if next_value >= chosen_number and row_color == "red" or next_value <= chosen_number and row_color == "blue":   
+                                break
+                    
+                    # If the previous value is not empty
+                    else:
                         """
-                        if the next value is not correct
-                        (higher than the chosen number for the red row
-                        lower than the chosen number for the blue row)
-                        """
-                        if next_value >= chosen_number and row_color == "red" or next_value <= chosen_number and row_color == "blue":   
-                            break
-                
-                # If the previous value is not empty
-                else:
-                    """
-                    if the previous value is correct
-                    (lower than the chosen number for the red row
-                    higher than the chosen number for the blue row)
-                    """                
-                    if previous_value < chosen_number and row_color == "red" or previous_value > chosen_number and row_color == "blue":
-                        possible_positions[row_color][index] = True
+                        if the previous value is correct
+                        (lower than the chosen number for the red row
+                        higher than the chosen number for the blue row)
+                        """                
+                        if previous_value < chosen_number and row_color == "red" or previous_value > chosen_number and row_color == "blue":
+                            possible_positions[row_color][index] = True
 
     return possible_positions
 
@@ -180,7 +184,7 @@ def get_adding_color(highest_lowest:dict) -> list:
     return acceptable_rows
 
 
-def show_possible_positions(chosen_number:int, possible_positions:dict):
+def show_possible_positions(possible_positions:dict):
     # For every row the user can choose from
     for color in possible_positions:
         row_values = [str(value) for value in board[color]] # All values as string
@@ -206,7 +210,7 @@ def choose_position(chosen_number:int, possible_positions:dict):
 
     # If the user did not choose a possible position
     while choosing_position:
-        chosen_position = input("Choose a possible position (x) (Examples: red 1, blue 4, etc...): ")
+        chosen_position = input(f"Choose a possible position (x) for the number {chosen_number} (Examples: (color) 1, (color) 2, etc...): ")
 
         # Check if the user answered the question correectly
         try:
@@ -239,8 +243,14 @@ def get_number_from_character(number_options:dict, chosen_character:str) -> int:
     return number_options[chosen_character]
 
 
+def check_add_white_row(chosen_character:str) -> bool:
+    add_white_dice = True if chosen_character == "c" or chosen_character == "d" else False
+
+    return add_white_dice
+
+
 def main():
-    show_board()
+    show_board() # Show the current board
     throwed_dices = throw_dices() # Throw the random dices
     highest_lowest = highest_lowest_numbers(throwed_dices) # Get the highest and lowest dice information
     number_options = get_number_options(throwed_dices, highest_lowest) # Get the possible numbers the user can choose
@@ -248,8 +258,17 @@ def main():
     chosen_number = get_number_from_character(number_options, chosen_character)
     acceptable_rows = get_adding_color(highest_lowest) # Get the color(s) of the rows the user can add the number
     possible_positions = get_possible_positions(chosen_number, acceptable_rows) # Get the possible positions inside the row
-    show_possible_positions(chosen_number, possible_positions) # Show the possible positions to the user
-    choose_position(chosen_number, possible_positions) # Let the user choose a possible position to place the enumber
+
+    show_possible_positions(possible_positions) # Show the possible row(s), with the possible position(s) in it
+    choose_position(chosen_number, possible_positions)# Let the user choose a possible position to place the number
+
+    # If the must must add the white dice to the white row
+    if check_add_white_row(chosen_character):
+        white_dice = throwed_dices['white'] # White dice the user rolled
+
+        possible_white_positions = get_possible_positions(white_dice, ['white']) # Get the possible positions in the white row
+        show_possible_positions(possible_white_positions) # Show the white row, with the possible position(s) in it
+        choose_position(white_dice, possible_white_positions) # Let the user choose a possible position to place the number
 
 
 
