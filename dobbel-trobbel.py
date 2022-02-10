@@ -77,8 +77,13 @@ def get_possible_positions(chosen_number:int, acceptable_rows:list) -> dict:
                         (lower than the chosen number for the red row
                         higher than the chosen number for the blue row)
                         """                
-                        if previous_value < chosen_number and row_color == "red" or previous_value > chosen_number and row_color == "blue":
-                            possible_positions[row_color][index] = True
+                        if isinstance(next_value, str):
+                            if previous_value < chosen_number and row_color == "red" or previous_value > chosen_number and row_color == "blue":
+                                possible_positions[row_color][index] = True
+                        else:
+                            if previous_value < chosen_number and next_value >= chosen_number and row_color == "red" or previous_value > chosen_number and next_value >= chosen_number and row_color == "blue":
+                                possible_positions[row_color][index] = True
+
 
     return possible_positions
 
@@ -255,7 +260,9 @@ def check_add_white_row(chosen_character:str) -> bool:
 #  Get which possible number can be chosen by the user
 def get_valid_possibilities(number_options:dict, acceptable_rows:list) -> dict:
     number_options_list = list(number_options.values()) # All the possible numbers
-    
+    new_number_options = number_options.copy()
+
+
     # For every number
     for key, number_option in zip(number_options, number_options_list):
         # Check if the number can be added to the specific row
@@ -269,9 +276,9 @@ def get_valid_possibilities(number_options:dict, acceptable_rows:list) -> dict:
                     break
             else:  
                 # If the row is full, the possible number gets deleted 
-                del number_options[key]
+                del new_number_options[key]
 
-    return number_options
+    return new_number_options
 
 
 # Check if the game is over
@@ -368,7 +375,7 @@ def main():
         number_options = get_valid_possibilities(number_options, acceptable_rows)
         
         possible_white_positions = get_possible_positions(white_dice, ['white']) # Get the possible positions in the white row
-        game_over = check_gameover(number_options, possible_white_positions)
+        game_over = check_gameover(number_options, possible_white_positions) # Check if the game is over
 
         if not game_over:
             chosen_character = choose_number(number_options) # Let the user choose a possible character for the number
@@ -383,11 +390,11 @@ def main():
                 show_possible_positions(possible_white_positions) # Show the white row, with the possible position(s) in it
                 choose_position(white_dice, possible_white_positions) # Let the user choose a possible position to place the number
         else:
-            sub_total_one = calculate_sub_total_one()
-            sub_total_two = calculate_sub_total_two()
-            end_score = calculate_end_score(sub_total_one, sub_total_two)
+            sub_total_one = calculate_sub_total_one() # Calculate the sub total 1
+            sub_total_two = calculate_sub_total_two() # Calculate the sub total 2
+            end_score = calculate_end_score(sub_total_one, sub_total_two) # Calculate the end score
 
-            show_end_score(end_score)
+            show_end_score(end_score) # Show the end score
 
 
 
